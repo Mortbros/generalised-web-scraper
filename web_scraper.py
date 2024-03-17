@@ -12,6 +12,7 @@ import time
 import requests
 import pickle
 
+import typing
 #TODO: add first iteration support
 
 #TODO: add recording of actions
@@ -27,19 +28,31 @@ class Scraper:
         self.status_row = {"iter_num": 0, "action": "Adding body to string", "status": None, "ID": None}
         self.sign_in_url = sign_in_url
 
+class StatusRow:
+    def __init__(self, status_row = {"iter_num": 0, "action": "Adding body to string", "status": None, "ID": None}):
+        vars(self)['status_row'] = status_row
+
+    def __setattr__(self, attr, value):
+        super.__setattr__(attr, value)
+        print(self)
+
+    def __str__(self):
+        return "status_row"
+        # return '| {:^9}| {:<22}| {:<15}| {}'.format(*self.status_row.values())
 
 # An object representing an element, including all possible methods of locating it (xpath, css selector)
-class ElementQuery:
-    #  selectors=[[selector, type], [selector, type]]
-    def __init__(self, selectors=[]):
+class Element:
+    def __init__(self, selectors: list[Selector]=[]):
         self.selectors = selectors
-        self.status_row = {"iter_num": 0, "action": "Adding body to string", "status": None, "ID": None}
+        self.status_row = StatusRow()
 
     def find(selectors, click=False, timeout=5):
         for index, selector, sel_type in enumerate(selectors):
             status_row["status"] = f"Trying selector {index}"
             # print_row(status_row)
-            if index != 0: # Wait for pageload on first selector, do all others as quick as possible
+            # Wait for pageload on first selector, do all others as quick as possible
+            # This shouldn't need to be modified by the user, as you can't run selectors when the page hasnt been loaded
+            if index != 0: 
                 timeout = 0
             if element := wait_for_elem(selector, sel_type, click, timeout):
                 status_row["status"] = "Success"
@@ -51,9 +64,7 @@ class ElementQuery:
 
     # Add selector to list at index
     # (depending on priority e.g one selector should be tried first because it has a higher chance at succeeding)
-    def add_selector(self, selector, sel_type, index=0):
-        # By.CSS_SELECTOR
-        # By.XPATH
+    def add_selector(self, selector: Selector, index=0):
         types = {"xpath": By.XPATH, "css": By.CSS_SELECTOR}
         self.selectors.insert(index, [selector, types[sel_type]])
 
