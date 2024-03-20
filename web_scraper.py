@@ -219,11 +219,19 @@ class Element:
         return "none"
         # return '| {:^9}| {:<22}| {:<15}| {}'.format(*self.status_row.values())
 
-# TODO: make it auto-detect the selector type
 class Selector:
-    def __init__(self, sel_value, sel_type):
+    def __init__(self, sel_value: str, sel_type=None):
         self.sel_value = sel_value
-        self.sel_type = sel_type
+
+        if sel_type:
+            self.sel_type = sel_type
+        else:
+            # Auto-detect the selector type
+            if sel_value[0] == "/":
+                self.sel_type = By.XPATH
+            else: #TODO: this is fragile
+                self.sel_type = By.CSS_SELECTOR
+
     
     def __iter__(self):
         return iter([sel_value, sel_type])
