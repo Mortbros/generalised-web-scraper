@@ -29,12 +29,25 @@ ACTION_LIST = ["capture", "click", "validate", "click capture", "send keys", "se
 
 
 class WebScraper:
-    def __init__(self, name, url, sign_in_url, sequences: list[ElementSequence], headless=False):
+    def __init__(self, name, url, sign_in_url, sequences: list[ElementSequence], sign_in_sequence: ElementSequence, headless=False):
         self.name = name
         self.url = url
         self.elements = elements
         self.status_row = {"iter_num": 0, "action": "Adding body to string", "status": None, "ID": None}
         self.sign_in_url = sign_in_url
+        
+        if isinstance(sequences, list):
+            if all(isinstance(i, ElementSequence) for i in sequences):
+                self.sequences = sequences
+            else:
+                raise Exception("Invalid list of element sequence, all elements must be of type ElementSequence")
+        else:
+            raise Exception(f"Invalid list of element sequences, must be of type list (currently {type(sequence)})")
+
+        if isinstance(sequences, ElementSequence):
+            self.sign_in_sequence = sign_in_sequence
+        else:
+            raise Exception(f"Invalid sign in element sequence, must be of ElementSequence (currently {type(sequence)})")
 
         self.options = Options()
         self.options.headless = headless
@@ -42,7 +55,9 @@ class WebScraper:
 
         self.html = ""
 
-        self.status_row = StatusRow()
+        self.sequence_index = 0
+
+        # self.status_row = StatusRow()
 
     def write():
         open(f"{self.name}.html", "w", encoding="utf-8").write(self.html)
@@ -50,8 +65,17 @@ class WebScraper:
     def start():
         self.driver.get(url)
 
-    def start_sign_in():
-        self.driver.get(sign_in_url)
+    def iterate(iterations: int=1):
+        if len(self.sequences) < self.sequence_index + iterations + 1:
+            raise Exception(f"Invalid iteration, list is of length {len(self.sequences)}, iteration would access index {sequence_index + iterations + 1}")
+        for i in range(self.sequence_index + 1, self.sequence_index + iterations):
+            self.sequences[i].run()
+        self.sequence_index += iterations
+
+    def sign_in():
+        self.driver.get(self.sign_in_url)
+        self.sign_in_sequence.run()
+        
 
 
 # class StatusRow:
@@ -67,8 +91,19 @@ class WebScraper:
 #         # return '| {:^9}| {:<22}| {:<15}| {}'.format(*self.status_row.values())
 
 class ElementSequence:
-    def __init__(self, driver, elements, url=None):
+    def __init__(self, driver, elements=[], url=None):
         self.driver = driver
+
+        if isinstance(elements, list):
+            if len(elements) == 0:
+                self.elements = elements
+            elif all(isinstance(i, Element) for i in elements):
+                self.elements = elements
+            else:
+                raise Exception("Invalid element sequence, all elements must be of type Element")
+        else:
+            raise Exception(f"Invalid element sequence must be of type list (currently {type(sequence)})")
+        
         self.elements = elements
         self.url = url
 
@@ -90,15 +125,17 @@ class ElementSequence:
         #     raise Exception("Element {element} not in sequence")
     
     def run():
-        if self.url:
-            self.driver.get(self.url)
-        
-        html_out = ""
-        for element in self.elements:
-            html_out += element.run()
-        
-        return html_out
-
+        if len(self.elements) != 0:
+            if self.url:
+                self.driver.get(self.url)
+            
+            html_out = ""
+            for element in self.elements:
+                html_out += element.run()
+            
+            return html_out
+        else:
+            raise Exception("Cannot run empty ElementSequence")
 # An object representing an element, including all possible methods of locating it (xpath, css selector)
 class Element:
     def __init__(self, name, selectors: list[Selector]=[], action="click", timeout=DEFAULT_TIMEOUT):
