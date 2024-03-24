@@ -1,0 +1,46 @@
+<mxfile host="Electron" modified="2024-03-21T04:51:29.903Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.0.4 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="gcVnJu-8O-0cNC6OyaUT" version="24.0.4" type="device">
+  <diagram name="Page-1" id="28EsyYX7qPjY6iQVNlVW">
+    <mxGraphModel dx="797" dy="540" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="MGwmv5jMbbGlzGrfNvid-4" target="MGwmv5jMbbGlzGrfNvid-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-7" value="Has many" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="MGwmv5jMbbGlzGrfNvid-6">
+          <mxGeometry x="-0.1092" y="3" relative="1" as="geometry">
+            <mxPoint x="-3" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-4" value="WebScraper" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="365" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="MGwmv5jMbbGlzGrfNvid-5" target="MGwmv5jMbbGlzGrfNvid-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-10" value="Has many" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="MGwmv5jMbbGlzGrfNvid-9">
+          <mxGeometry x="-0.0764" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-5" value="ElementSequence" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="365" y="320" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="MGwmv5jMbbGlzGrfNvid-8" target="MGwmv5jMbbGlzGrfNvid-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-13" value="Has many" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="MGwmv5jMbbGlzGrfNvid-12">
+          <mxGeometry x="-0.0679" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-8" value="Element" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="365" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="MGwmv5jMbbGlzGrfNvid-11" value="Selector" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="365" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
