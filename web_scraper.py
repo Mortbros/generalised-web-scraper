@@ -27,10 +27,11 @@ import typing
 # TODO: record successes for element selectors and reorder list depending on how likely each selector is to succeed
 # TODO: add recording of actions
 # TODO: documentation
+# TODO: talk about return types (specifically the return type of the element object) and code strictness with xena
 
 DEFAULT_TIMEOUT = 10
 RESTART_DELAY = 2
-IFRAME_ACTION_LIST = {"all", "extract body"}
+IFRAME_ACTION_LIST = {"all", "body"}
 
 class ElementExistsError(Exception):
     """Raised if the element exists when it shouldn't"""
@@ -180,11 +181,13 @@ class ElementSequence:
     
     def _excecute_iteration(self, driver):
         if self.url:
-            self.driver.get(self.url)
+            driver.get(self.url)
 
         try:
             for element in self.elements:
-                self.html += element.run(driver=driver)
+                element_out = element.run(driver=driver)
+                if element.capture:
+                    self.html += element_out
             return True
         except ElementExistsError:
             time.sleep(self.restart_delay)
@@ -242,22 +245,17 @@ class Element:
         # self.status_row = StatusRow()
         self.status_row = {"iter_num": 0, "action": "Adding body to string", "status": None, "ID": None}
         
-    def run(self, driver):
-        if self.timeout:
-            timeout = self.timeout
-        else:
-            timeout = DEFAULT_TIMEOUT
-        
+    def run(self, driver):        
         for index, selector in enumerate(self.selectors):
             print(f"\t\tFinding element: {self.name}, selector {selector} ")
             sel_value = selector.sel_value
             sel_type = selector.sel_type
             # status_row["status"] = f"Trying selector {index}"
             
-            # Wait for pageload on first selector, do all others as quick as possible
-            # This shouldn't need to be modified by the user, as you can't run selectors when the page hasn't been loaded
-            if index == 0: 
-                timeout = 0
+            # # Wait for pageload on first selector, do all others as quick as possible
+            # # This shouldn't need to be modified by the user, as you can't run selectors when the page hasn't been loaded
+            # if index == 0: 
+            #     timeout = 0
             if element := self._wait_for_elem(driver, sel_value, sel_type):
                 if self.ensure_absence:
                     raise ElementExistsError(f"Element '{self.name}' found when it shouldn't exist")
@@ -267,14 +265,21 @@ class Element:
                 if self.send_values:
                     if self.clear:
                         element.clear()
-                    element.send_keys(send_values)
+                    element.send_keys(self.send_values)
                 print("\t\t\tSuccess: Element found")
-                return element
+                if self.capture:
+                    html_out = element.get_attribute("innerHTML")
+                    if html_out:
+                        return html_out
+                    else:
+                        return ""
+                else: # We have some options here: return True, "", or the selenium element object. I'm not sure what is 
+                    return True
         # status_row["status"] = "Element not found"
         # print_row(status_row)
 
         # exit if the element must appear
-        if ensure_absence:
+        if self.ensure_absence:
             print("\t\t\tSuccess: Element not found (yes really)")
             return True
         elif self.critical:
