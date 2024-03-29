@@ -1,4 +1,7 @@
-from web_scraper import WebScraper, Element, ElementSequence, Selector
+from WebScraper import WebScraper
+from ElementSequence import ElementSequence
+from Element import Element
+from Selector import Selector
 
 # Not the biggest fan of the critical=False for this. It is there because of the ensure_absensce in the elementSequence
 username_textbox = Element(
@@ -83,16 +86,15 @@ def canvas_scraper(name, url):
     scraper.run()
 
 
-for i in range(5):
-    canvas_scraper(
-        "Algorithms and Analysis",
-        "https://rmit.instructure.com/courses/125079/pages/week-1-overview-read-me-first?module_item_id=5924235",
-    )
-    canvas_scraper(
-        "Fullstack Development",
-        "https://rmit.instructure.com/courses/132457/pages/welcome-to-the-course?module_item_id=5888855",
-    )
-    canvas_scraper(
-        "Software Engineering Fundamentals",
-        "https://rmit.instructure.com/courses/124890/pages/our-commitment-to-reconciliation?module_item_id=6024511",
-    )
+canvas_scraper(
+    "Algorithms and Analysis",
+    "https://rmit.instructure.com/courses/125079/pages/week-1-overview-read-me-first?module_item_id=5924235",
+)
+canvas_scraper(
+    "Fullstack Development",
+    "https://rmit.instructure.com/courses/132457/pages/welcome-to-the-course?module_item_id=5888855",
+)
+canvas_scraper(
+    "Software Engineering Fundamentals",
+    "https://rmit.instructure.com/courses/124890/pages/our-commitment-to-reconciliation?module_item_id=6024511",
+)

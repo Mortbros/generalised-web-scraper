@@ -1,61 +1,22 @@
-from re import M
-from selenium import webdriver
+from Selector import Selector
+from web_scraper_errors import ElementExistsError, ElementNotFoundError
+
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
-
-# from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.wait import WebDriverWait
-
 from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchWindowException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 
 import time
-from datetime import datetime
 
-import typing
-
-# TODO: download all videos, grab transcript, add to HTML
-# TODO: open iframe and grab content from it
-# iframe_capture="all"|"extract body"|[ElementSequence]
-# run a sequence if a specific condition is met in the URL
-# Or just grab entire HTML and append
-# Or run a list of elementSequences until HTML is extracted, else just grab entire HTML
-# OPTIONAL: Flag for recursive iframe html extraction
-# TODO: status row
-# TODO: get transcript of all youtube videos https://pypi.org/project/youtube-transcript-api/
-# TODO: add automatic downloads of files, specifically pdfs
-# TODO: figure out a better way of passing the driver around, maybe via object inheritance?
-# TODO: add support for regular expression matching in element url field so it only works on urls that match the regex
-# TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
-# TODO: add exit condition (url contains "x", selector fails, specific selector exists, script has run for n mins)
-# TODO: record successes for element selectors and reorder list depending on how likely each selector is to succeed
-# TODO: documentation
-# TODO: talk about return types (specifically the return type of the element object) and code strictness with xena
-# TODO: replace all Exception("...") with actual errors
-# TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
 
 
 DEFAULT_TIMEOUT = 10
-RESTART_DELAY = 2
 IFRAME_ACTION_LIST = {"html", "body"}
 ELEMENT_FIND_MODES = ["run for n time", "wait per selector"]
 IGNORED_EXCEPTIONS = (NoSuchElementException, StaleElementReferenceException)
-
-
-class ElementExistsError(Exception):
-    """Raised if the element exists when it shouldn't"""
-
-    pass
-
-
-class ElementNotFoundError(Exception):
-    """Raised if the element doesn't exist when it should"""
-
-    pass
 
 def ordinal_suffix(i):
     i = str(i)
@@ -67,216 +28,6 @@ def ordinal_suffix(i):
         return "rd"
     else:
         return "th"
-
-
-class WebScraper:
-    def __init__(
-        self,
-        name,
-        url,
-        sign_in_url,
-        sequences,
-        sign_in_sequence,
-        headless=False,
-        unique_file_name=True,
-    ):
-        self.name = name
-        self.url = url
-        self.status_row = {
-            "iter_num": 0,
-            "action": "Adding body to string",
-            "status": None,
-            "ID": None,
-        }
-        self.sign_in_url = sign_in_url
-
-        if isinstance(sequences, list):
-            if all(isinstance(i, ElementSequence) for i in sequences):
-                self.sequences = sequences
-            else:
-                raise Exception(
-                    "Invalid list of element sequence, all elements must be of type ElementSequence"
-                )
-        elif isinstance(sequences, ElementSequence):
-            self.sequences = [sequences]
-        else:
-            raise Exception(
-                f"Invalid list of element sequences, must be of type list (currently {type(sequences)})"
-            )
-
-        if isinstance(sequences, ElementSequence):
-            self.sign_in_sequence = sign_in_sequence
-        else:
-            raise Exception(
-                f"Invalid sign in element sequence, must be of ElementSequence (currently {type(sequences)})"
-            )
-
-        self.options = Options()
-        self.options.headless = headless
-        self.driver = webdriver.Chrome(options=self.options)
-
-        self.unique_file_name = unique_file_name
-
-        self.html = ""
-
-        self.sequence_index = 0
-
-        # self.status_row = StatusRow()
-
-    def run(self):
-        try:
-            self.sign_in()
-            self.open_url()
-            self.iterate_sequence()
-            self.write()
-        except NoSuchWindowException:
-            print("Window closed, writing to file")
-            self.write()
-
-    def write(self):
-        open(
-            f"{self.name}{datetime.now().strftime(' %Y-%m-%d_%H-%M-%S') if self.unique_file_name else ''}.html",
-            "w",
-            encoding="utf-8",
-        ).write(self.html)
-
-    # TODO: rename this function or combine it with something else
-    def open_url(self):
-        print(f"Starting scraper: {self.name}")
-        self.driver.get(self.url)
-
-    def iterate_sequence(self, iterations: int = 1):
-        if len(self.sequences) < self.sequence_index + iterations:
-            raise Exception(
-                f"Invalid iteration, list is of length {len(self.sequences)}, iteration would access index {self.sequence_index + iterations + 1}"
-            )
-        for i in range(self.sequence_index, self.sequence_index + iterations):
-            print(f"Running {self.name} scraper sequence {i}:")
-            self.html += self.sequences[i].run(driver=self.driver)
-        self.sequence_index += iterations
-
-    def sign_in(self):
-        print(f"Signing into scraper: {self.name}")
-        self.driver.get(self.sign_in_url)
-        self.sign_in_sequence.run(driver=self.driver)
-    
-    def reset(self):
-        pass
-
-
-# class StatusRow:
-#     def __init__(self, status_row = {"iter_num": 0, "action": "Adding body to string", "status": None, "ID": None}):
-#         vars(self)['status_row'] = status_row
-
-#     def __setattr__(self, attr, value):
-#         super.__setattr__(attr, value)
-#         print(self)
-
-#     def __str__(self):
-#         return "status_row"
-#         # return '| {:^9}| {:<22}| {:<15}| {}'.format(*self.status_row.values())
-
-
-class ElementSequence:
-    def __init__(
-        self,
-        name,
-        elements=[],
-        url=None,
-        run_until_fail=False,
-        restart_on_fail: int = 1,
-        restart_delay=RESTART_DELAY,
-    ):
-        self.html = ""
-
-        self.name = name
-
-        if isinstance(elements, list):
-            if len(elements) == 0:
-                self.elements = elements
-            elif all(isinstance(i, Element) for i in elements):
-                self.elements = elements
-            else:
-                raise Exception(
-                    "Invalid element sequence, all elements must be of type Element"
-                )
-        else:
-            raise Exception(
-                f"Invalid element sequence must be of type list (currently {type(elements)})"
-            )
-
-        self.elements = elements
-        self.url = url
-
-        self.run_until_fail = run_until_fail
-        self.restart_on_fail = restart_on_fail
-        self.restart_delay = restart_delay
-
-    def __add__(self, element):
-        if isinstance(element, list):
-            for elem in element:
-                if isinstance(elem, Element):
-                    self.elements.append(element)
-                else:
-                    raise Exception(f"Invalid element type {type(elem)}")
-        else:
-            if isinstance(element, Element):
-                self.elements.append(element)
-
-    def __sub__(self, element):
-        if element in self.elements:
-            self.elements.remove(element)
-        # else:
-        #     raise Exception("Element {element} not in sequence")
-
-    # Runs iteration
-    def run(self, driver):
-        # This check is located here because an ElementSequence can be initialised with no elements, then populated later
-        if len(self.elements) != 0:
-            # TODO: i'm not the biggest fan of moving over a block of code to the _excecute_iteration private function
-            if self.run_until_fail:
-                iteration = 1
-                while True:
-                    print(f"\tExcecuting sequence: {self.name}, iteration {iteration}")
-                    if not self._excecute_iteration(driver):
-                        break
-                    iteration += 1
-            else:
-                for r in range(self.restart_on_fail):
-                    print(f"\tExcecuting sequence: {self.name}, attempt {r + 1}")
-                    if self._excecute_iteration(driver):
-                        break
-                else:
-                    raise Exception(
-                        f'Element sequence "{self.name}" failed to find and validate after {self.restart_on_fail} attempts'
-                    )
-
-            print("\t\tFinished after failing to find")
-        else:
-            raise Exception("Cannot run empty ElementSequence")
-        return self.html
-
-    def reset(self):
-        pass
-
-    def _excecute_iteration(self, driver):
-        if self.url:
-            driver.get(self.url)
-
-        try:
-            for element in self.elements:
-                element_out = element.run(driver=driver)
-                if element.capture_attribute == "innerHTML":
-                    self.html += element_out
-            return True
-        except ElementExistsError:
-            time.sleep(self.restart_delay)
-        except ElementNotFoundError as e:
-            if self.run_until_fail:
-                return False
-            else:
-                raise ElementNotFoundError(e)
-
 
 # An object representing an element, including all possible methods of locating it (xpath, css selector)
 class Element:
@@ -516,25 +267,3 @@ class Element:
     def __str__(self):
         return str(self.selectors)
         # return '| {:^9}| {:<22}| {:<15}| {}'.format(*self.status_row.values())
-
-
-class Selector:
-    def __init__(self, sel_value: str, sel_type=None):
-        self.sel_value = sel_value
-
-        if sel_type:
-            self.sel_type = sel_type
-        else:
-            # Auto-detect the selector type
-            # TODO: this is fragile
-            if sel_value[0] == "/":
-                self.sel_type = By.XPATH
-            else:
-                self.sel_type = By.CSS_SELECTOR
-
-    # Selector[0] = self.sel_value, Selector[1] = self.sel_type
-    def __iter__(self):
-        return iter([self.sel_value, self.sel_type])
-
-    def __str__(self):
-        return f'{self.sel_value} (type "{self.sel_type}")'
