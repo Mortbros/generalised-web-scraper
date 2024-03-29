@@ -8,10 +8,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchWindowException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 
 import time
+from datetime import datetime
 
 import typing
 
@@ -70,7 +72,7 @@ def ordinal_suffix(i):
 
 
 class WebScraper:
-    def __init__(self, name, url, sign_in_url, sequences, sign_in_sequence, headless=False):
+    def __init__(self, name, url, sign_in_url, sequences, sign_in_sequence, headless=False, unique_file_name=True):
         self.name = name
         self.url = url
         self.status_row = {"iter_num": 0, "action": "Adding body to string", "status": None, "ID": None}
@@ -95,6 +97,8 @@ class WebScraper:
         self.options.headless = headless
         self.driver = webdriver.Chrome(options=self.options)
 
+        self.unique_file_name = unique_file_name
+
         self.html = ""
 
         self.sequence_index = 0
@@ -102,16 +106,20 @@ class WebScraper:
         # self.status_row = StatusRow()
 
     def run(self):
-        self.sign_in()
-        self.start()
-        self.iterate_sequence()
-        self.write()
-    
+        try:
+            self.sign_in()
+            self.open_url()
+            self.iterate_sequence()
+            self.write()
+        except NoSuchWindowException:
+            print("Window closed, writing to file")
+            self.write()
+
     def write(self):
-        open(f"{self.name}.html", "w", encoding="utf-8").write(self.html)
+        open(f"{self.name}{datetime.now().strftime(' %Y-%m-%d_%H-%M-%S') if self.unique_file_name else ''}.html", "w", encoding="utf-8").write(self.html)
 
     # TODO: rename this function or combine it with something else
-    def start(self):
+    def open_url(self):
         print(f"Starting scraper: {self.name}")
         self.driver.get(self.url)
 
