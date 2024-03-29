@@ -27,14 +27,16 @@ import typing
 # OPTIONAL: Flag for recursive iframe html extraction
 # TODO: status row
 # TODO: get transcript of all youtube videos https://pypi.org/project/youtube-transcript-api/
-# TODO: add support for regular expression matching in element url field so it only works on urls that match the regex
+# TODO: add automatic downloads of files, specifically pdfs
 # TODO: figure out a better way of passing the driver around, maybe via object inheritance?
+# TODO: add support for regular expression matching in element url field so it only works on urls that match the regex
 # TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
 # TODO: add exit condition (url contains "x", selector fails, specific selector exists, script has run for n mins)
 # TODO: record successes for element selectors and reorder list depending on how likely each selector is to succeed
 # TODO: documentation
 # TODO: talk about return types (specifically the return type of the element object) and code strictness with xena
 # TODO: replace all Exception("...") with actual errors
+# TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
 
 
 DEFAULT_TIMEOUT = 10
@@ -55,12 +57,6 @@ class ElementNotFoundError(Exception):
 
     pass
 
-
-# st is used with numbers ending in 1
-# nd is used with numbers ending in 2
-# rd is used with numbers ending in 3
-# As an exception to the above rules, numbers ending with 11, 12, and 13 use -th (e.g. 11th, pronounced eleventh, 112th, pronounced one hundred [and] twelfth)
-# th is used for all other numbers (e.g. 9th, pronounced ninth)
 def ordinal_suffix(i):
     i = str(i)
     if i[-1] == "1" and not i[-2:] == "11":
@@ -163,6 +159,9 @@ class WebScraper:
         print(f"Signing into scraper: {self.name}")
         self.driver.get(self.sign_in_url)
         self.sign_in_sequence.run(driver=self.driver)
+    
+    def reset(self):
+        pass
 
 
 # class StatusRow:
@@ -257,6 +256,9 @@ class ElementSequence:
             raise Exception("Cannot run empty ElementSequence")
         return self.html
 
+    def reset(self):
+        pass
+
     def _excecute_iteration(self, driver):
         if self.url:
             driver.get(self.url)
@@ -284,6 +286,7 @@ class Element:
         selectors=[],
         mode="run for n time",
         capture_attribute="",
+        content_contains="",
         click=False,
         return_on_click=False,
         send_values=None,
@@ -324,6 +327,7 @@ class Element:
             raise Exception(f"Invalid selector type '{type(selectors)}'")
 
         self.capture_attribute = capture_attribute
+        self.content_contains = content_contains.lower()
         self.click = click
         self.return_on_click = return_on_click
         self.send_values = send_values
@@ -410,6 +414,18 @@ class Element:
                             f"Element '{self.name}' found when it shouldn't exist, selector '{selector}'"
                         )
 
+                    if self.content_contains:
+                        if self.content_contains in element.get_attribute("innerHTML").lower():
+                            print(
+                                f"\t\t\tSuccess: Element innerHTML contains content '{self.content_contains}'"
+                            )
+                        else:
+                            print(
+                                f"\t\t\tFailed:Element innerHTML doesn't contain content '{self.content_contains}'"
+                            )
+                            return_status = False
+                            continue
+
                     if self.click:
                         element.click()
                         if self.return_on_click:
@@ -493,6 +509,9 @@ class Element:
     # def add_selector(self, selector, index=-1):
     #     types = {"xpath": By.XPATH, "css": By.CSS_SELECTOR}
     #     self.selectors.insert(index, [selector, types[sel_type]])
+    
+    def reset(self):
+        pass
 
     def __str__(self):
         return str(self.selectors)

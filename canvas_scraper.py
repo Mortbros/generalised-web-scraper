@@ -64,6 +64,7 @@ next_button = Element(
     ],
     click=True,
     return_on_click=True,
+    content_contains="next"
 )
 
 grab_content_sequence = ElementSequence(
