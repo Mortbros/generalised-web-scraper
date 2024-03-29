@@ -48,6 +48,7 @@ class Element:
         pageload_wait=0,
         url=None,
         iframe_capture="",
+        banned_iframe_url_snippets=["about:blank"],
         retry_on_stale: int = 5,
     ):
         self.name = name
@@ -104,6 +105,13 @@ class Element:
             self.iframe_capture = iframe_capture
         else:
             raise Exception("Invalid iframe capture method")
+
+        if isinstance(banned_iframe_url_snippets, list):
+            self.banned_iframe_url_snippets = banned_iframe_url_snippets
+            if "about:blank" not in self.banned_iframe_url_snippets:
+                self.banned_iframe_url_snippets.append("about:blank")
+        else:
+            raise Exception("Invalid banned iframe url snippets, must be of type list")
 
         self.retry_on_stale = retry_on_stale
         self._current_retry_on_stale = retry_on_stale
@@ -194,45 +202,6 @@ class Element:
                             attribute_catches += attribute_value
                         else:
                             attribute_catches.append(attribute_value)
-
-                # TODO: untested
-                if self.iframe_capture:
-                    # This is probably bad practice, but it works(?)
-
-                    IFRAME_ELEMENT_SRC = Element(
-                        name="(Internal) Iframe capture URL source",
-                        selectors=Selector("iframe", By.TAG_NAME),
-                        timeout=5,
-                        capture_attribute="src",
-                        critical=False,
-                    )
-
-                    iframe_srcs = IFRAME_ELEMENT_SRC.run(driver)
-                    if iframe_srcs:
-
-                        BODY_ELEMENT_HTML = Element(
-                            name="(Internal) Iframe capture innerHTML",
-                            selectors=Selector("body", By.TAG_NAME),
-                            iframe_capture="body",
-                            timeout=5,
-                            capture_attribute="innerHTML",
-                            critical=False,
-                        )
-
-                        for iframe_src in iframe_srcs:
-                            # TODO: mac support with Keys.COMMAND?
-                            driver.find_element_by_tag_name("body").send_keys(
-                                Keys.CONTROL + "t"
-                            )
-
-                            driver.get(iframe_src)
-                            if new_tab_html := BODY_ELEMENT_HTML.run(driver):
-                                attribute_catches = attribute_catches + new_tab_html
-
-                            driver.find_element_by_tag_name("body").send_keys(
-                                Keys.CONTROL + "w"
-                            )
-
             except StaleElementReferenceException as e:
                 if self._current_retry_on_stale <= 0:
                     raise e
@@ -242,6 +211,37 @@ class Element:
                     )
                     self._current_retry_on_stale -= 1
                     self.run(driver)
+
+        # TODO: untested
+        if self.iframe_capture:
+            # This is probably bad practice, but it works(?)
+
+            IFRAME_ELEMENT_SRC = Element(
+                name="(Internal) Iframe capture URL source",
+                selectors=Selector("iframe", By.TAG_NAME),
+                timeout=5,
+                capture_attribute="src",
+                critical=False,
+            )
+
+            iframe_srcs = IFRAME_ELEMENT_SRC.run(driver)
+            if iframe_srcs:
+                # filter out invalid/banned iframe url snippets
+                iframe_srcs = [f for f in iframe_srcs if f and not any(b in f for b in self.banned_iframe_url_snippets)]
+                for iframe_src in iframe_srcs:
+                    print(f"\t\t\tOpening iframe url, extracting {self.iframe_capture} element: {iframe_src}")
+                    driver.execute_script(f"window.open('{iframe_src}','_blank');")
+                    driver.switch_to.window(driver.window_handles[1])
+                    
+                    if new_tab_html := WebDriverWait(driver, DEFAULT_TIMEOUT).until(EC.presence_of_element_located((By.TAG_NAME, 'body'))).get_attribute("innerHTML"):
+                        if isinstance(attribute_catches, list):
+                            attribute_catches = "".join(attribute_catches)
+                        attribute_catches = attribute_catches + "BEGIN IFRAME HTML INSERTION" + new_tab_html + "END IFRAME HTML INSERTION"
+
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
+
+
 
         if self.ensure_absence:  # exit if the element must appear
             print("\t\t\tSuccess: Element not found (yes really)")

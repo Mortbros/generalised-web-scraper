@@ -51,6 +51,8 @@ content = Element(
         "/html/body/div[4]/div[2]/div[2]/div[3]/div[1]/div",
     ],
     capture_attribute="innerHTML",
+    iframe_capture="body",
+    banned_iframe_url_snippets=["sso.canvaslms.com"]
 )
 
 next_button = Element(
@@ -67,7 +69,7 @@ next_button = Element(
     ],
     click=True,
     return_on_click=True,
-    content_contains="next"
+    content_contains="next",
 )
 
 grab_content_sequence = ElementSequence(
@@ -90,11 +92,11 @@ canvas_scraper(
     "Algorithms and Analysis",
     "https://rmit.instructure.com/courses/125079/pages/week-1-overview-read-me-first?module_item_id=5924235",
 )
-canvas_scraper(
-    "Fullstack Development",
-    "https://rmit.instructure.com/courses/132457/pages/welcome-to-the-course?module_item_id=5888855",
-)
-canvas_scraper(
-    "Software Engineering Fundamentals",
-    "https://rmit.instructure.com/courses/124890/pages/our-commitment-to-reconciliation?module_item_id=6024511",
-)
+# canvas_scraper(
+#     "Fullstack Development",
+#     "https://rmit.instructure.com/courses/132457/pages/welcome-to-the-course?module_item_id=5888855",
+# )
+# canvas_scraper(
+#     "Software Engineering Fundamentals",
+#     "https://rmit.instructure.com/courses/124890/pages/our-commitment-to-reconciliation?module_item_id=6024511",
+# )

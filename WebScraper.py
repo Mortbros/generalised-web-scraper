@@ -88,6 +88,7 @@ class WebScraper:
             self.iterate_sequence()
             self.write()
         except NoSuchWindowException:
+            # TODO: this doesn't do what i want it to. an empty html file is created
             print("Window closed, writing to file")
             self.write()
 
