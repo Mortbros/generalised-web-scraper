@@ -7,23 +7,10 @@ from selenium.common.exceptions import NoSuchWindowException
 from datetime import datetime
 
 
-# TODO: download all videos, grab transcript, add to HTML
-# TODO: open iframe and grab content from it
-# iframe_capture="all"|"extract body"|[ElementSequence]
-# run a sequence if a specific condition is met in the URL
-# Or just grab entire HTML and append
-# Or run a list of elementSequences until HTML is extracted, else just grab entire HTML
-# OPTIONAL: Flag for recursive iframe html extraction
 # TODO: status row
-# TODO: get transcript of all youtube videos https://pypi.org/project/youtube-transcript-api/
-# TODO: add automatic downloads of files, specifically pdfs
 # TODO: figure out a better way of passing the driver around, maybe via object inheritance?
-# TODO: add support for regular expression matching in element url field so it only works on urls that match the regex
 # TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
-# TODO: add exit condition (url contains "x", selector fails, specific selector exists, script has run for n mins)
-# TODO: record successes for element selectors and reorder list depending on how likely each selector is to succeed
 # TODO: documentation
-# TODO: talk about return types (specifically the return type of the element object) and code strictness with xena
 # TODO: replace all Exception("...") with actual errors
 # TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
 
