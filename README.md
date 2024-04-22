@@ -30,4 +30,7 @@ Potential features
 - Support for regular expression matching in url field
 - Custom elementSequence exit conditions
 - Dynamic reordering of Selectors to decrease runtime
-- Force pageload functionality
+- Force pageload functionality, stop the page loading run from there
+- Stylesheet and Javascript extraction:
+  - Grab first instance/one instance/all instances
+- Flag for headless operation
