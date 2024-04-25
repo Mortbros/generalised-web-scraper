@@ -50,9 +50,10 @@ content = Element(
         "/html/body/div[4]/div[2]/div[2]/div[3]/div[1]/div/div[1]",
         "/html/body/div[4]/div[2]/div[2]/div[3]/div[1]/div",
     ],
+    download=True,
     capture_attribute="innerHTML",
     iframe_capture="body",
-    banned_iframe_url_snippets=["sso.canvaslms.com"]
+    banned_iframe_url_snippets=["sso.canvaslms.com"],
 )
 
 next_button = Element(
@@ -89,9 +90,14 @@ def canvas_scraper(name, url):
 
 
 canvas_scraper(
-    "Algorithms and Analysis",
-    "https://rmit.instructure.com/courses/125079/pages/week-1-overview-read-me-first?module_item_id=5924235",
+    "Introduction to Cybersecurity",
+    "https://rmit.instructure.com/courses/131916/pages/week-1-lecture?module_item_id=6068665",
 )
+
+# canvas_scraper(
+#     "Algorithms and Analysis",
+#     "https://rmit.instructure.com/courses/125079/pages/week-1-overview-read-me-first?module_item_id=5924235",
+# )
 # canvas_scraper(
 #     "Fullstack Development",
 #     "https://rmit.instructure.com/courses/132457/pages/welcome-to-the-course?module_item_id=5888855",

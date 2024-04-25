@@ -6,6 +6,7 @@ from selenium.common.exceptions import NoSuchWindowException
 
 from datetime import datetime
 
+import os
 
 # TODO: status row
 # TODO: figure out a better way of passing the driver around, maybe via object inheritance?
@@ -13,6 +14,7 @@ from datetime import datetime
 # TODO: documentation
 # TODO: replace all Exception("...") with actual errors
 # TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
+
 
 class WebScraper:
     def __init__(
@@ -56,9 +58,30 @@ class WebScraper:
                 f"Invalid sign in element sequence, must be of ElementSequence (currently {type(sequences)})"
             )
 
-        self.options = Options()
-        self.options.headless = headless
-        self.driver = webdriver.Chrome(options=self.options)
+        # Directory structure looks like this
+        # │ Code Files here
+        # └───Web Scraper downloads
+        #     ├───Web Scraper 1 Name
+        #     │       Web Scraper 1 Files
+        #     ├───Web Scraper 2 Name
+        #     │       Web Scraper 2 Files
+        #     └───Web Scraper 3 Name
+        #             Web Scraper 3 Files
+        # We cd into the web scraper directory each time the scraper is ran, then cd out for repeatability
+        downloads_path = os.path.join(os.getcwd(), "WebScraper downloads")
+        self._original_path = os.getcwd()
+        self._current_scraper_path = os.path.join(downloads_path, self.name)
+        # TODO: name validation, make the name a valid path
+        if not os.path.exists(downloads_path):
+            os.mkdir(downloads_path)
+        scraper_dir = os.path.join(downloads_path, self.name)
+        if not os.path.exists(scraper_dir):
+            os.mkdir(scraper_dir)
+
+        options = Options()
+        options.headless = headless
+        options.add_argument(f"download.default_directory={self._current_scraper_path}")
+        self.driver = webdriver.Chrome(options=options)
 
         self.unique_file_name = unique_file_name
 
@@ -70,18 +93,22 @@ class WebScraper:
 
     def run(self):
         try:
+            os.chdir(self._current_scraper_path)
             self.sign_in()
             self.open_url()
             self.iterate_sequence()
             self.write()
+            os.chdir(self._original_path)
         except NoSuchWindowException:
             # TODO: this doesn't do what i want it to. an empty html file is created
             print("Window closed, writing to file")
             self.write()
 
     def write(self):
+        filename = f"{self.name}{datetime.now().strftime(' %Y-%m-%d_%H-%M-%S') if self.unique_file_name else ''}.html"
+        print(f"Writing to file {filename}")
         open(
-            f"{self.name}{datetime.now().strftime(' %Y-%m-%d_%H-%M-%S') if self.unique_file_name else ''}.html",
+            filename,
             "w",
             encoding="utf-8",
         ).write(self.html)
@@ -105,6 +132,6 @@ class WebScraper:
         print(f"Signing into scraper: {self.name}")
         self.driver.get(self.sign_in_url)
         self.sign_in_sequence.run(driver=self.driver)
-    
+
     def reset(self):
         pass

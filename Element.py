@@ -10,13 +10,14 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 
 import time
-
+import os
 
 
 DEFAULT_TIMEOUT = 10
 IFRAME_ACTION_LIST = {"html", "body"}
 ELEMENT_FIND_MODES = ["run for n time", "wait per selector"]
 IGNORED_EXCEPTIONS = (NoSuchElementException, StaleElementReferenceException)
+
 
 def ordinal_suffix(i):
     i = str(i)
@@ -28,6 +29,7 @@ def ordinal_suffix(i):
         return "rd"
     else:
         return "th"
+
 
 # An object representing an element, including all possible methods of locating it (xpath, css selector)
 class Element:
@@ -47,6 +49,7 @@ class Element:
         timeout=DEFAULT_TIMEOUT,
         pageload_wait=0,
         url=None,
+        download=False,
         iframe_capture="",
         banned_iframe_url_snippets=["about:blank"],
         retry_on_stale: int = 5,
@@ -100,6 +103,10 @@ class Element:
 
         self.url = url
 
+        # TODO: store downloaded files in the web scraper and pass down
+        self.download = download
+        self._downloaded_files = []
+
         # Brackets for readability
         if (not iframe_capture) or (iframe_capture in IFRAME_ACTION_LIST):
             self.iframe_capture = iframe_capture
@@ -113,6 +120,8 @@ class Element:
         else:
             raise Exception("Invalid banned iframe url snippets, must be of type list")
 
+        # The element may change in the time between finding it and using it,
+        # causing a StaleElementReferenceException. Retry retry_on_stale times when this happens
         self.retry_on_stale = retry_on_stale
         self._current_retry_on_stale = retry_on_stale
 
@@ -126,16 +135,19 @@ class Element:
             self._last_url = current_url
             time.sleep(self.pageload_wait)
 
+        # Try and find the element as many times as possible until the timeout
+        # There is 0 timeout for the individual searches, instead a timeout overall
         if self.mode == ELEMENT_FIND_MODES[0]:
             self.timeout = 0
             end_time = time.time() + self._loop_timeout
             while time.time() < end_time and not out:
                 out = self.find(driver)
                 self._current_retry_on_stale = self.retry_on_stale
-
+        # Try and find the element once, with default timeouts
         elif self.mode == ELEMENT_FIND_MODES[1]:
             out = self.find(driver)
 
+        # Reset retry_on_stale attempts, for potential reruns of this element
         self._current_retry_on_stale = self.retry_on_stale
 
         return out
@@ -174,7 +186,10 @@ class Element:
                         )
 
                     if self.content_contains:
-                        if self.content_contains in element.get_attribute("innerHTML").lower():
+                        if (
+                            self.content_contains
+                            in element.get_attribute("innerHTML").lower()
+                        ):
                             print(
                                 f"\t\t\tSuccess: Element innerHTML contains content '{self.content_contains}'"
                             )
@@ -202,6 +217,23 @@ class Element:
                             attribute_catches += attribute_value
                         else:
                             attribute_catches.append(attribute_value)
+                    if self.download:
+                        # The dot at the start of the xpath means that we only search for download links contained in the current element
+                        download_link_elem = element.find_elements(
+                            By.XPATH, ".//*[@download and @href]"
+                        )
+                        # TODO: wait for downloads to finish in order to quit
+                        if len(download_link_elem) > 0:
+                            for dl in [
+                                dle.get_attribute("href")
+                                for dle in download_link_elem
+                                if dle.get_attribute("href")
+                                not in self._downloaded_files
+                            ]:
+                                driver.execute_script(f"window.open('{dl}','_blank');")
+                                driver.switch_to.window(driver.window_handles[0])
+                                self._downloaded_files.append(dl)
+
             except StaleElementReferenceException as e:
                 if self._current_retry_on_stale <= 0:
                     raise e
@@ -212,9 +244,8 @@ class Element:
                     self._current_retry_on_stale -= 1
                     self.run(driver)
 
-        # TODO: untested
         if self.iframe_capture:
-            # This is probably bad practice, but it works(?)
+            # This is probably bad practice, but it works
 
             IFRAME_ELEMENT_SRC = Element(
                 name="(Internal) Iframe capture URL source",
@@ -227,21 +258,34 @@ class Element:
             iframe_srcs = IFRAME_ELEMENT_SRC.run(driver)
             if iframe_srcs:
                 # filter out invalid/banned iframe url snippets
-                iframe_srcs = [f for f in iframe_srcs if f and not any(b in f for b in self.banned_iframe_url_snippets)]
+                iframe_srcs = [
+                    f
+                    for f in iframe_srcs
+                    if f and not any(b in f for b in self.banned_iframe_url_snippets)
+                ]
                 for iframe_src in iframe_srcs:
-                    print(f"\t\t\tOpening iframe url, extracting {self.iframe_capture} element: {iframe_src}")
+                    print(
+                        f"\t\t\tOpening iframe url, extracting {self.iframe_capture} element: {iframe_src}"
+                    )
                     driver.execute_script(f"window.open('{iframe_src}','_blank');")
                     driver.switch_to.window(driver.window_handles[1])
-                    
-                    if new_tab_html := WebDriverWait(driver, DEFAULT_TIMEOUT).until(EC.presence_of_element_located((By.TAG_NAME, 'body'))).get_attribute("innerHTML"):
+
+                    if (
+                        new_tab_html := WebDriverWait(driver, DEFAULT_TIMEOUT)
+                        .until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+                        .get_attribute("innerHTML")
+                    ):
                         if isinstance(attribute_catches, list):
                             attribute_catches = "".join(attribute_catches)
-                        attribute_catches = attribute_catches + "BEGIN IFRAME HTML INSERTION" + new_tab_html + "END IFRAME HTML INSERTION"
+                        attribute_catches = (
+                            attribute_catches
+                            + "BEGIN IFRAME HTML INSERTION"
+                            + new_tab_html
+                            + "END IFRAME HTML INSERTION"
+                        )
 
                     driver.close()
                     driver.switch_to.window(driver.window_handles[0])
-
-
 
         if self.ensure_absence:  # exit if the element must appear
             print("\t\t\tSuccess: Element not found (yes really)")
@@ -260,7 +304,7 @@ class Element:
     # def add_selector(self, selector, index=-1):
     #     types = {"xpath": By.XPATH, "css": By.CSS_SELECTOR}
     #     self.selectors.insert(index, [selector, types[sel_type]])
-    
+
     def reset(self):
         pass
 
