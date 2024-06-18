@@ -74,12 +74,12 @@ class WebScraper:
         # TODO: name validation, make the name a valid path
         if not os.path.exists(downloads_path):
             os.mkdir(downloads_path)
-        scraper_dir = os.path.join(downloads_path, self.name)
-        if not os.path.exists(scraper_dir):
-            os.mkdir(scraper_dir)
+        if not os.path.exists(self._current_scraper_path):
+            os.mkdir(self._current_scraper_path)
 
         options = Options()
         options.headless = headless
+        # Doesn't work
         options.add_argument(f"download.default_directory={self._current_scraper_path}")
         self.driver = webdriver.Chrome(options=options)
 
@@ -107,6 +107,8 @@ class WebScraper:
     def write(self):
         filename = f"{self.name}{datetime.now().strftime(' %Y-%m-%d_%H-%M-%S') if self.unique_file_name else ''}.html"
         print(f"Writing to file {filename}")
+        print(len(self.html))
+        print(self.html)
         open(
             filename,
             "w",

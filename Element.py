@@ -215,6 +215,7 @@ class Element:
                             if isinstance(attribute_catches, list):
                                 attribute_catches = "".join(attribute_catches)
                             attribute_catches += attribute_value
+                            print("\t\t\tCapturing HTML")
                         else:
                             attribute_catches.append(attribute_value)
                     if self.download:
@@ -277,9 +278,8 @@ class Element:
                     ):
                         if isinstance(attribute_catches, list):
                             attribute_catches = "".join(attribute_catches)
-                        attribute_catches = (
-                            attribute_catches
-                            + "BEGIN IFRAME HTML INSERTION"
+                        attribute_catches += (
+                            "BEGIN IFRAME HTML INSERTION"
                             + new_tab_html
                             + "END IFRAME HTML INSERTION"
                         )

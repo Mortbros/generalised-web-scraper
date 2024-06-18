@@ -50,7 +50,7 @@ content = Element(
         "/html/body/div[4]/div[2]/div[2]/div[3]/div[1]/div/div[1]",
         "/html/body/div[4]/div[2]/div[2]/div[3]/div[1]/div",
     ],
-    download=True,
+    # download=True,
     capture_attribute="innerHTML",
     iframe_capture="body",
     banned_iframe_url_snippets=["sso.canvaslms.com"],
