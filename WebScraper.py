@@ -27,7 +27,7 @@ class WebScraper:
         headless=False,
         unique_file_name=True,
     ):
-        self.name = name
+        self.name = "".join(l for l in name if l not in "\\/:*?\"<>',")
         self.url = url
         self.status_row = {
             "iter_num": 0,
@@ -70,12 +70,14 @@ class WebScraper:
         # We cd into the web scraper directory each time the scraper is ran, then cd out for repeatability
         downloads_path = os.path.join(os.getcwd(), "WebScraper downloads")
         self._original_path = os.getcwd()
+        # A bit of a stupid way to convert the scraper name to a valid file name
+        # This might come back to bite me, as this conversion is not done everywhere
         self._current_scraper_path = os.path.join(downloads_path, self.name)
         # TODO: name validation, make the name a valid path
         if not os.path.exists(downloads_path):
             os.mkdir(downloads_path)
         if not os.path.exists(self._current_scraper_path):
-            os.mkdir(self._current_scraper_path)
+            os.makedirs(self._current_scraper_path, exist_ok=True)
 
         options = Options()
         options.headless = headless
@@ -107,8 +109,6 @@ class WebScraper:
     def write(self):
         filename = f"{self.name}{datetime.now().strftime(' %Y-%m-%d_%H-%M-%S') if self.unique_file_name else ''}.html"
         print(f"Writing to file {filename}")
-        print(len(self.html))
-        print(self.html)
         open(
             filename,
             "w",
