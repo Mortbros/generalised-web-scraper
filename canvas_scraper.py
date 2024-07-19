@@ -90,9 +90,30 @@ def canvas_scraper(name, url):
 
 
 canvas_scraper(
-    "Introduction to Cybersecurity",
-    "https://rmit.instructure.com/courses/131916/pages/week-1-lecture?module_item_id=6068665",
+    "Software Engineering: Process and Tools",
+    "https://rmit.instructure.com/courses/125192/pages/home-page?module_item_id=6465180",
 )
+
+canvas_scraper(
+    "Software Requirements Engineering",
+    "https://rmit.instructure.com/courses/131934/pages/welcome-to-course?module_item_id=6438187",
+)
+
+canvas_scraper(
+    "Software Testing",
+    "https://rmit.instructure.com/courses/125163/pages/welcome-to-the-course?module_item_id=6377885",
+)
+
+canvas_scraper(
+    "Systems Architecture & Design",
+    "https://rmit.instructure.com/courses/131921/pages/welcome-to-the-course?module_item_id=6480836",
+)
+
+
+# canvas_scraper(
+#     "Introduction to Cybersecurity",
+#     "https://rmit.instructure.com/courses/131916/pages/week-1-lecture?module_item_id=6068665",
+# )
 
 # canvas_scraper(
 #     "Algorithms and Analysis",
