@@ -6,7 +6,6 @@ import time
 RESTART_DELAY = 2
 
 
-
 class ElementSequence:
     def __init__(
         self,
@@ -59,9 +58,9 @@ class ElementSequence:
         # else:
         #     raise Exception("Element {element} not in sequence")
 
-    # Runs iteration
+    # runs iteration
     def run(self, driver):
-        # This check is located here because an ElementSequence can be initialised with no elements, then populated later
+        # this check is located here because an ElementSequence can be initialised with no elements, then populated later
         if len(self.elements) != 0:
             # TODO: i'm not the biggest fan of moving over a block of code to the _excecute_iteration private function
             if self.run_until_fail:

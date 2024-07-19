@@ -58,7 +58,7 @@ class WebScraper:
                 f"Invalid sign in element sequence, must be of ElementSequence (currently {type(sequences)})"
             )
 
-        # Directory structure looks like this
+        # directory structure looks like this
         # │ Code Files here
         # └───Web Scraper downloads
         #     ├───Web Scraper 1 Name
@@ -67,11 +67,11 @@ class WebScraper:
         #     │       Web Scraper 2 Files
         #     └───Web Scraper 3 Name
         #             Web Scraper 3 Files
-        # We cd into the web scraper directory each time the scraper is ran, then cd out for repeatability
+        # we cd into the web scraper directory each time the scraper is ran, then cd out for repeatability
         downloads_path = os.path.join(os.getcwd(), "WebScraper downloads")
         self._original_path = os.getcwd()
-        # A bit of a stupid way to convert the scraper name to a valid file name
-        # This might come back to bite me, as this conversion is not done everywhere
+        # a bit of a stupid way to convert the scraper name to a valid file name
+        # this might come back to bite me, as this conversion is not done everywhere
         self._current_scraper_path = os.path.join(downloads_path, self.name)
         # TODO: name validation, make the name a valid path
         if not os.path.exists(downloads_path):
@@ -81,7 +81,7 @@ class WebScraper:
 
         options = Options()
         options.headless = headless
-        # Doesn't work
+        # doesn't work
         options.add_argument(f"download.default_directory={self._current_scraper_path}")
         self.driver = webdriver.Chrome(options=options)
 

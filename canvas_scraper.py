@@ -3,7 +3,7 @@ from ElementSequence import ElementSequence
 from Element import Element
 from Selector import Selector
 
-# Not the biggest fan of the critical=False for this. It is there because of the ensure_absensce in the elementSequence
+# not the biggest fan of the critical=False for this. It is there because of the ensure_absensce in the elementSequence
 username_textbox = Element(
     name="Username textbox",
     selectors="#Ecom_User_ID",

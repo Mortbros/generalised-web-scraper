@@ -31,7 +31,7 @@ def ordinal_suffix(i):
         return "th"
 
 
-# An object representing an element, including all possible methods of locating it (xpath, css selector)
+# an object representing an element, including all possible methods of locating it (xpath, css selector)
 class Element:
     def __init__(
         self,
@@ -107,7 +107,7 @@ class Element:
         self.download = download
         self._downloaded_files = []
 
-        # Brackets for readability
+        # brackets for readability
         if (not iframe_capture) or (iframe_capture in IFRAME_ACTION_LIST):
             self.iframe_capture = iframe_capture
         else:
@@ -120,7 +120,7 @@ class Element:
         else:
             raise Exception("Invalid banned iframe url snippets, must be of type list")
 
-        # The element may change in the time between finding it and using it,
+        # the element may change in the time between finding it and using it,
         # causing a StaleElementReferenceException. Retry retry_on_stale times when this happens
         self.retry_on_stale = retry_on_stale
         self._current_retry_on_stale = retry_on_stale
@@ -135,19 +135,19 @@ class Element:
             self._last_url = current_url
             time.sleep(self.pageload_wait)
 
-        # Try and find the element as many times as possible until the timeout
-        # There is 0 timeout for the individual searches, instead a timeout overall
+        # try and find the element as many times as possible until the timeout
+        # there is 0 timeout for the individual searches, instead a timeout overall
         if self.mode == ELEMENT_FIND_MODES[0]:
             self.timeout = 0
             end_time = time.time() + self._loop_timeout
             while time.time() < end_time and not out:
                 out = self.find(driver)
                 self._current_retry_on_stale = self.retry_on_stale
-        # Try and find the element once, with default timeouts
+        # try and find the element once, with default timeouts
         elif self.mode == ELEMENT_FIND_MODES[1]:
             out = self.find(driver)
 
-        # Reset retry_on_stale attempts, for potential reruns of this element
+        # reset retry_on_stale attempts, for potential reruns of this element
         self._current_retry_on_stale = self.retry_on_stale
 
         return out
@@ -219,7 +219,7 @@ class Element:
                         else:
                             attribute_catches.append(attribute_value)
                     if self.download:
-                        # The dot at the start of the xpath means that we only search for download links contained in the current element
+                        # the dot at the start of the xpath means that we only search for download links contained in the current element
                         download_link_elem = element.find_elements(
                             By.XPATH, ".//*[@download and @href]"
                         )
@@ -246,7 +246,7 @@ class Element:
                     self.run(driver)
 
         if self.iframe_capture:
-            # This is probably bad practice, but it works
+            # this is probably bad practice, but it works
 
             IFRAME_ELEMENT_SRC = Element(
                 name="(Internal) Iframe capture URL source",
@@ -299,7 +299,7 @@ class Element:
                 print("\t\t\tFailed: Element not found")
             return return_status
 
-    # # Add selector to list at index
+    # # add selector to list at index
     # # (depending on priority e.g one selector should be tried first because it has a higher chance at succeeding)
     # def add_selector(self, selector, index=-1):
     #     types = {"xpath": By.XPATH, "css": By.CSS_SELECTOR}
