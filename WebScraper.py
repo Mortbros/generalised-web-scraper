@@ -1,4 +1,5 @@
 from ElementSequence import ElementSequence
+from DownloadHandler import DownloadHandler
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -16,7 +17,11 @@ import os
 # TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
 
 
+# The config class should not need to exist, all the scraper configuration should be set using function inputs.
+
+
 class WebScraper:
+
     def __init__(
         self,
         name,
@@ -26,7 +31,9 @@ class WebScraper:
         sign_in_sequence,
         headless=False,
         unique_file_name=True,
+        root_path=os.getcwd(),
     ):
+        self.download_handler = DownloadHandler()
         self.name = "".join(l for l in name if l not in "\\/:*?\"<>',")
         self.url = url
         self.status_row = {
@@ -59,31 +66,48 @@ class WebScraper:
             )
 
         # directory structure looks like this
-        # │ Code Files here
-        # └───Web Scraper downloads
+        # Configured root path
+        # └───Web Scraper output
         #     ├───Web Scraper 1 Name
-        #     │       Web Scraper 1 Files
+        #     │   │    Web Scraper 1 HTML output
+        #     │   └─── Downloads
+        #     │           Downloaded files
         #     ├───Web Scraper 2 Name
-        #     │       Web Scraper 2 Files
+        #     │   │    Web Scraper 2 HTML output
+        #     │   └─── Downloads
+        #     │           Downloaded files
         #     └───Web Scraper 3 Name
-        #             Web Scraper 3 Files
+        #         │    Web Scraper 3 HTML output
+        #         └─── Downloads
+        #                 Downloaded files
         # we cd into the web scraper directory each time the scraper is ran, then cd out for repeatability
-        downloads_path = os.path.join(os.getcwd(), "WebScraper downloads")
+
+        # os.path.exists fails if input is None
+        if root_path and not os.path.exists(root_path):
+            raise Exception(f"Invalid root path '{root_path}'")
+
+        self._current_scraper_path = os.path.join(
+            root_path, "Web Scraper output", self.name
+        )
+
+        self.download_path = os.path.join(self._current_scraper_path, "Downloads")
+
+        if not os.path.exists(self.download_path):
+            os.makedirs(self.download_path, exist_ok=True)
+
         self._original_path = os.getcwd()
-        # a bit of a stupid way to convert the scraper name to a valid file name
-        # this might come back to bite me, as this conversion is not done everywhere
-        self._current_scraper_path = os.path.join(downloads_path, self.name)
-        # TODO: name validation, make the name a valid path
-        if not os.path.exists(downloads_path):
-            os.mkdir(downloads_path)
-        if not os.path.exists(self._current_scraper_path):
-            os.makedirs(self._current_scraper_path, exist_ok=True)
+        self._original_path = os.getcwd()
 
         options = Options()
         options.headless = headless
-        # doesn't work
-        options.add_argument(f"download.default_directory={self._current_scraper_path}")
+
+        # alternate option for setting download directory
+        # prefs = {"download.default_directory": "C:\\Tutorial\\down"}
+        # options.add_experimental_option("prefs", prefs)
+
         self.driver = webdriver.Chrome(options=options)
+
+        self.download_handler = DownloadHandler()
 
         self.unique_file_name = unique_file_name
 
@@ -96,6 +120,8 @@ class WebScraper:
     def run(self):
         try:
             os.chdir(self._current_scraper_path)
+            self.download_handler.set_download_path(self.driver, self.download_path)
+            self.html = ""
             self.sign_in()
             self.open_url()
             self.iterate_sequence()
