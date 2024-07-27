@@ -49,7 +49,7 @@ class Element:
         timeout=DEFAULT_TIMEOUT,
         pageload_wait=0,
         url=None,
-        download=False,
+        download_files=False,
         iframe_capture="",
         banned_iframe_url_snippets=["about:blank"],
         retry_on_stale: int = 5,
@@ -104,10 +104,9 @@ class Element:
         self.url = url
 
         # TODO: store downloaded files in the web scraper and pass down
-        self.download = download
+        self.download_files = download_files
         self._downloaded_files = []
 
-        # brackets for readability
         if (not iframe_capture) or (iframe_capture in IFRAME_ACTION_LIST):
             self.iframe_capture = iframe_capture
         else:
@@ -195,7 +194,7 @@ class Element:
                             )
                         else:
                             print(
-                                f"\t\t\tFailed:Element innerHTML doesn't contain content '{self.content_contains}'"
+                                f"\t\t\tFailed: Element innerHTML doesn't contain content '{self.content_contains}'"
                             )
                             return_status = False
                             continue
@@ -218,7 +217,7 @@ class Element:
                             print("\t\t\tCapturing HTML")
                         else:
                             attribute_catches.append(attribute_value)
-                    if self.download:
+                    if self.download_files:
                         # the dot at the start of the xpath means that we only search for download links contained in the current element
                         download_link_elem = element.find_elements(
                             By.XPATH, ".//*[@download and @href]"

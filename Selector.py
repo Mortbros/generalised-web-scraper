@@ -8,7 +8,7 @@ class Selector:
         if sel_type:
             self.sel_type = sel_type
         else:
-            # auto-detect the selector type
+            # loosely auto-detect the selector type
             # TODO: this is fragile
             if sel_value[0] == "/":
                 self.sel_type = By.XPATH

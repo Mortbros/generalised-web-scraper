@@ -1,8 +1,10 @@
 from Element import Element
+
 from web_scraper_errors import ElementExistsError, ElementNotFoundError
 
 import time
 
+# how long to wait to retry if the element has been found
 RESTART_DELAY = 2
 
 
@@ -60,9 +62,10 @@ class ElementSequence:
 
     # runs iteration
     def run(self, driver):
+        self.html = ""
         # this check is located here because an ElementSequence can be initialised with no elements, then populated later
         if len(self.elements) != 0:
-            # TODO: i'm not the biggest fan of moving over a block of code to the _excecute_iteration private function
+            # TODO: i'm not the biggest fan of moving over a block of code to the _excecute_iteration "private" function
             if self.run_until_fail:
                 iteration = 1
                 while True:
