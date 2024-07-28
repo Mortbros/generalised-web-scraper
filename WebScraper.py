@@ -15,7 +15,9 @@ import os
 # TODO: documentation
 # TODO: replace all Exception("...") with actual errors
 # TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
-
+# TODO: write the links that have been downloaded to a JSON file in Web Scraper output/Scraper name/downloaded_files.json
+# looks like: {"downloaded_files": ["https://example.link.one", "https://example.link.two", "https://example.link.three"]}
+# possible TODO: store downloaded files in the web scraper and pass down. this would prevent files being downloaded multiple times across different scrapers
 
 # The config class should not need to exist, all the scraper configuration should be set using function inputs.
 

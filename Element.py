@@ -11,6 +11,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 
 import time
 import os
+import json
 
 
 DEFAULT_TIMEOUT = 10
@@ -103,9 +104,9 @@ class Element:
 
         self.url = url
 
-        # TODO: store downloaded files in the web scraper and pass down
         self.download_files = download_files
-        self._downloaded_files = []
+        # we cannot initialise the downloaded_files variable here because the Element class can be instantiated outside of a WebScraper instance
+        self._downloaded_files = None
 
         if (not iframe_capture) or (iframe_capture in IFRAME_ACTION_LIST):
             self.iframe_capture = iframe_capture
@@ -152,9 +153,18 @@ class Element:
         return out
 
     def find(self, driver):
-
         attribute_catches = []
         return_status = False
+
+        if self.download_files:
+            self._downloaded_files = {"downloaded_files": []}
+            # store links to downloaded files in a JSON file to prevent downloading a file mulitple times
+            if not os.path.isfile("downloaded_files.json"):
+                with open("downloaded_files.json", "w") as f:
+                    json.dump(self._downloaded_files, f)
+            else:
+                with open("downloaded_files.json", "r") as f:
+                    self._downloaded_files = json.load(f)
 
         for i, selector in enumerate(self.selectors):
             print(f"\t\tFinding element: {self.name}, selector {selector} ")
@@ -228,11 +238,11 @@ class Element:
                                 dle.get_attribute("href")
                                 for dle in download_link_elem
                                 if dle.get_attribute("href")
-                                not in self._downloaded_files
+                                not in self._downloaded_files["downloaded_files"]
                             ]:
                                 driver.execute_script(f"window.open('{dl}','_blank');")
                                 driver.switch_to.window(driver.window_handles[0])
-                                self._downloaded_files.append(dl)
+                                self._downloaded_files["downloaded_files"].append(dl)
 
             except StaleElementReferenceException as e:
                 if self._current_retry_on_stale <= 0:
@@ -285,6 +295,11 @@ class Element:
 
                     driver.close()
                     driver.switch_to.window(driver.window_handles[0])
+
+        # write list of links that have been downloaded to file
+        if self.download_files:
+            with open("downloaded_files.json", "w") as f:
+                json.dump(self._downloaded_files, f)
 
         if self.ensure_absence:  # exit if the element must appear
             print("\t\t\tSuccess: Element not found (yes really)")
