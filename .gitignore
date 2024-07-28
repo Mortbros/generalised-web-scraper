@@ -1,5 +1,8 @@
 *.pyc
+*.doc
 *.docx
 *.pdf
 *.pptx
+*.xlsx
 *.html
+downloaded_files.json
