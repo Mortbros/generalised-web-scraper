@@ -15,7 +15,6 @@ import os
 # TODO: documentation
 # TODO: figure out a better way of passing the driver around, maybe via object inheritance?
 # TODO: status row
-# TODO: replace all Exception("...") with actual errors
 # TODO: keep track of the following in the web_scraper_data.json file:
 #           last link processed
 #           list of all links processed

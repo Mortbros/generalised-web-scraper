@@ -58,12 +58,14 @@ class Element:
         self.name = name
 
         if mode not in ELEMENT_FIND_MODES:
-            raise Exception(f"Invalid Element mode type: {mode}")
+            raise ElementNotFoundError(
+                f"Invalid Element mode type '{mode}', not found in '{ELEMENT_FIND_MODES}'"
+            )
         else:
             self.mode = mode
 
         # if not all(isinstance(sel, Selector) for sel in selectors):
-        #     raise Exception("Invalid selector")
+        #     raise ElementNotFoundError("Invalid selector")
 
         # selectors could be a string, Selector, or list of a combination of strings or selectors
         if isinstance(selectors, str):
@@ -78,9 +80,9 @@ class Element:
                 elif isinstance(s, Selector):
                     self.selectors.append(s)
                 else:
-                    raise Exception(f"Invalid selector type '{type(s)}'")
+                    raise ElementNotFoundError(f"Invalid selector type '{type(s)}'")
         else:
-            raise Exception(f"Invalid selector type '{type(selectors)}'")
+            raise ElementNotFoundError(f"Invalid selector type '{type(selectors)}'")
 
         self.capture_attribute = capture_attribute
         self.content_contains = content_contains.lower()
@@ -111,14 +113,16 @@ class Element:
         if (not iframe_capture) or (iframe_capture in IFRAME_ACTION_LIST):
             self.iframe_capture = iframe_capture
         else:
-            raise Exception("Invalid iframe capture method")
+            raise ElementNotFoundError(
+                f"Invalid iframe capture method, iframe_capture '{iframe_capture}' not present in '{IFRAME_ACTION_LIST}'"
+            )
 
         if isinstance(banned_iframe_url_snippets, list):
             self.banned_iframe_url_snippets = banned_iframe_url_snippets
             if "about:blank" not in self.banned_iframe_url_snippets:
                 self.banned_iframe_url_snippets.append("about:blank")
         else:
-            raise Exception("Invalid banned iframe url snippets, must be of type list")
+            raise TypeError("Invalid banned iframe url snippets, must be of type list")
 
         # the element may change in the time between finding it and using it,
         # causing a StaleElementReferenceException. Retry retry_on_stale times when this happens

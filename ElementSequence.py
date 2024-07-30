@@ -58,7 +58,7 @@ class ElementSequence:
         if element in self.elements:
             self.elements.remove(element)
         # else:
-        #     raise Exception("Element {element} not in sequence")
+        #     raise ElementNotFoundError("Element '{element}' not in sequence")
 
     # runs iteration
     def run(self, driver):
@@ -85,7 +85,7 @@ class ElementSequence:
 
             print("\t\tFinished after failing to find")
         else:
-            raise Exception("Cannot run empty ElementSequence")
+            raise ValueError("Cannot run empty ElementSequence")
         return self.html
 
     def reset(self):
