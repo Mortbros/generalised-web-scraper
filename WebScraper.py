@@ -5,19 +5,26 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchWindowException
 
+from document_merger import DocumentMerger, DocumentMergerConfig
+import os
+
 from datetime import datetime
 
 import os
 
-# TODO: status row
-# TODO: figure out a better way of passing the driver around, maybe via object inheritance?
-# TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
 # TODO: documentation
+# TODO: figure out a better way of passing the driver around, maybe via object inheritance?
+# TODO: status row
 # TODO: replace all Exception("...") with actual errors
+# TODO: keep track of the following in the web_scraper_data.json file:
+#           last link processed
+#           list of all links processed
+#           last datetime this scraper was ran
+#           location of last output
+# TODO: flag to reprocess all pages every n time, using the last datetime this scraper was ran in the json file
+# TODO: grab last html output and append to the end when not entirely reprocessing
 # TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
-# TODO: write the links that have been downloaded to a JSON file in Web Scraper output/Scraper name/downloaded_files.json
-# looks like: {"downloaded_files": ["https://example.link.one", "https://example.link.two", "https://example.link.three"]}
-# possible TODO: store downloaded files in the web scraper and pass down. this would prevent files being downloaded multiple times across different scrapers
+# TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
 
 # The config class should not need to exist, all the scraper configuration should be set using function inputs.
 
@@ -34,6 +41,7 @@ class WebScraper:
         headless=False,
         unique_file_name=True,
         root_path=os.getcwd(),
+        document_merger_config=None,
     ):
         self.download_handler = DownloadHandler()
         self.name = "".join(l for l in name if l not in "\\/:*?\"<>',")
@@ -69,35 +77,33 @@ class WebScraper:
 
         # directory structure looks like this
         # Configured root path
-        # └───Web Scraper output
-        #     ├───Web Scraper 1 Name
-        #     │   │    Web Scraper 1 HTML output
-        #     │   └─── Downloads
-        #     │           Downloaded files
-        #     ├───Web Scraper 2 Name
-        #     │   │    Web Scraper 2 HTML output
-        #     │   └─── Downloads
-        #     │           Downloaded files
-        #     └───Web Scraper 3 Name
-        #         │    Web Scraper 3 HTML output
-        #         └─── Downloads
-        #                 Downloaded files
+        # ├───Web Scraper 1 Name
+        # │   │    Web Scraper 1 HTML output
+        # │   └─── Web Scraper Downloads
+        # │           Downloaded files
+        # ├───Web Scraper 2 Name
+        # │   │    Web Scraper 2 HTML output
+        # │   └─── Web Scraper Downloads
+        # │           Downloaded files
+        # └───Web Scraper 3 Name
+        #     │    Web Scraper 3 HTML output
+        #     └─── Web Scraper Downloads
+        #             Downloaded files
         # we cd into the web scraper directory each time the scraper is ran, then cd out for repeatability
 
         # os.path.exists fails if input is None
         if root_path and not os.path.exists(root_path):
             raise Exception(f"Invalid root path '{root_path}'")
 
-        self._current_scraper_path = os.path.join(
-            root_path, "Web Scraper output", self.name
+        self._current_scraper_path = os.path.join(root_path, self.name)
+
+        self.download_path = os.path.join(
+            self._current_scraper_path, "Web Scraper Downloads"
         )
-
-        self.download_path = os.path.join(self._current_scraper_path, "Downloads")
-
+        # create all directories in download path
         if not os.path.exists(self.download_path):
             os.makedirs(self.download_path, exist_ok=True)
 
-        self._original_path = os.getcwd()
         self._original_path = os.getcwd()
 
         options = Options()
@@ -118,6 +124,7 @@ class WebScraper:
         self.sequence_index = 0
 
         # self.status_row = StatusRow()
+        self.document_merger_config = document_merger_config
 
     def run(self):
         try:
@@ -129,6 +136,17 @@ class WebScraper:
             self.iterate_sequence()
             self.write()
             os.chdir(self._original_path)
+
+            # run document merger
+            if self.document_merger_config:
+                if isinstance(self.document_merger_config, DocumentMergerConfig):
+                    self.document_merger_config.analysis_path = (
+                        self._current_scraper_path
+                    )
+                    DocumentMerger(self.document_merger_config).start()
+                else:
+                    raise TypeError("Invalid document_merger_config type")
+
         except NoSuchWindowException:
             # TODO: this doesn't do what i want it to. an empty html file is created
             print("Window closed, writing to file")
