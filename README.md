@@ -20,7 +20,7 @@ Features
 - Dynamic delays and handling of element loading times
 - Negative elements (make sure an element doesn't exist)
 - Pre-defined sequences of element interactions and extractions
-
+- Flag for headless operation
 
 Potential features
 - Proper documentation
@@ -33,4 +33,3 @@ Potential features
 - Force pageload functionality, stop the page loading run from there
 - Stylesheet and Javascript extraction:
   - Grab first instance/one instance/all instances
-- Flag for headless operation
