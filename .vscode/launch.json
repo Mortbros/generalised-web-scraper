@@ -16,7 +16,8 @@
             "type": "debugpy",
             "request": "launch",
             "program": "canvas_scraper.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

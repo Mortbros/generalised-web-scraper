@@ -163,11 +163,11 @@ class Element:
         if self.download_files:
             self._downloaded_files = {"downloaded_files": []}
             # store links to downloaded files in a JSON file to prevent downloading a file mulitple times
-            if not os.path.isfile("downloaded_files.json"):
-                with open("downloaded_files.json", "w") as f:
+            if not os.path.isfile("web_scraper_data.json"):
+                with open("web_scraper_data.json", "w") as f:
                     json.dump(self._downloaded_files, f)
             else:
-                with open("downloaded_files.json", "r") as f:
+                with open("web_scraper_data.json", "r") as f:
                     self._downloaded_files = json.load(f)
 
         for i, selector in enumerate(self.selectors):
@@ -302,7 +302,7 @@ class Element:
 
         # write list of links that have been downloaded to file
         if self.download_files:
-            with open("downloaded_files.json", "w") as f:
+            with open("web_scraper_data.json", "w") as f:
                 json.dump(self._downloaded_files, f)
 
         if self.ensure_absence:  # exit if the element must appear

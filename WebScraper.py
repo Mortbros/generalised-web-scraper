@@ -20,11 +20,18 @@ import os
 #           list of all links processed
 #           last datetime this scraper was ran
 #           location of last output
+# {
+#     "downloaded_files": [],
+#     "last_processed_url": "",
+#     "processed_urls": [],
+#     "last_ran": "",
+#     "outputs": [],
+# }
 # TODO: flag to reprocess all pages every n time, using the last datetime this scraper was ran in the json file
 # TODO: grab last html output and append to the end when not entirely reprocessing
 # TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
 # TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
-
+# TODO: catch errors when there is no internet
 # The config class should not need to exist, all the scraper configuration should be set using function inputs.
 
 
@@ -106,7 +113,9 @@ class WebScraper:
         self._original_path = os.getcwd()
 
         options = Options()
-        options.headless = headless
+
+        if headless:
+            options.add_argument("--headless=new")
 
         # alternate option for setting download directory
         # prefs = {"download.default_directory": "C:\\Tutorial\\down"}

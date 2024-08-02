@@ -90,7 +90,7 @@ def canvas_scraper(name, url):
         temp_file_path=f"{user_path}Downloads\\document-merger",
         file_path_map_path=f"{user_path}Downloads\\document-merger\\path_map.json",
         ocr_map_path=f"{user_path}Downloads\\document-merger\\ocr_map.json",
-        image_output_path=f"{user_path}Downloads\\document-merger\\images",
+        # image_output_path=f"{user_path}Downloads\\document-merger\\images",
         tesseract_path="C:\\Program files\\Tesseract-OCR\\tesseract.exe",
         ignored_dirs=("Textbooks", "temp", "__pycache__"),
         main_output_type="html",
@@ -107,6 +107,7 @@ def canvas_scraper(name, url):
         sign_in_sequence=sign_in_sequence,
         root_path="C:\\Users\\sandr\\OneDrive\\Homework\\2024",
         document_merger_config=document_merger_config,
+        headless=True,
     )
     scraper.run()
 
@@ -127,9 +128,8 @@ canvas_scraper(
 )
 
 canvas_scraper(
-    "Systems Architecture & Design",
+    "Systems Architecture and Design",
     "https://rmit.instructure.com/courses/131921/pages/welcome-to-the-course?module_item_id=6480836",
-    merge_documents=True,
 )
 
 
