@@ -99,7 +99,12 @@ class ElementSequence:
             for element in self.elements:
                 element_out = element.run(driver=driver)
                 if element.capture_attribute == "innerHTML":
-                    self.html += element_out
+                    # this sucks, i shouldn't need to fix this here. Instead it should be fixed implicitly in element.find() line ~227
+                    self.html += (
+                        element_out
+                        if not isinstance(element_out, list)
+                        else "".join(element_out)
+                    )
             return True
         except ElementExistsError:
             time.sleep(self.restart_delay)
