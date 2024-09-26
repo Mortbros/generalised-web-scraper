@@ -8,6 +8,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import ElementNotInteractableException
 
 import time
 import os
@@ -44,7 +46,7 @@ class Element:
         click=False,
         return_on_click=False,
         send_values=None,
-        clear=True,
+        clear=False,
         ensure_absence=False,
         critical=True,
         timeout=DEFAULT_TIMEOUT,
@@ -214,7 +216,19 @@ class Element:
                             continue
 
                     if self.click:
-                        element.click()
+                        try:
+                            element.click()
+                        except ElementClickInterceptedException:
+                            print(
+                                f"\t\t\tFailed: Cannot click element due to intercepting element"
+                            )
+                            return False
+                        except ElementNotInteractableException:
+                            print(
+                                f"\t\t\tFailed: Cannot click element, element not interactable"
+                            )
+                            return False
+
                         if self.return_on_click:
                             return True
                     if self.send_values:
