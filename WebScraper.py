@@ -12,26 +12,30 @@ from datetime import datetime
 
 import os
 
+# Sorted from most to least relevant
 # TODO: documentation
 # TODO: figure out a better way of passing the driver around, maybe via object inheritance?
-# TODO: status row
+# TODO: move the web_scraper_data.json file from each directory into a single global file in the a directory
 # TODO: keep track of the following in the web_scraper_data.json file:
 #           last link processed
 #           list of all links processed
 #           last datetime this scraper was ran
-#           location of last output
-# {
-#     "downloaded_files": [],
+#           location of all combined HTML outputs
+# "scraper name": {
+#     "downloaded_files": [abs_path_to_downloaded_files],
 #     "last_processed_url": "",
-#     "processed_urls": [],
-#     "last_ran": "",
+#     "processed_urls": [{"url": "", "datetime": ""}],
+#     "last_processed_time": unix,
 #     "outputs": [],
 # }
 # TODO: flag to reprocess all pages every n time, using the last datetime this scraper was ran in the json file
 # TODO: grab last html output and append to the end when not entirely reprocessing
-# TODO: add Ctrl + D to force stop the page loading if the page is taking forever to load (and i mean forever, like 30 seconds)
-# TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
+# TODO: add Ctrl + D to force stop the page loading if the page is taking ages to load (and i mean ages, like 30 seconds)
 # TODO: catch errors when there is no internet
+# TODO: reuse the same browser window, check for accessibility to given url and sign in only if needed
+# TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
+# TODO: status row
+
 # The config class should not need to exist, all the scraper configuration should be set using function inputs.
 
 
