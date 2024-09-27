@@ -33,6 +33,7 @@ import os
 # TODO: add Ctrl + D to force stop the page loading if the page is taking ages to load (and i mean ages, like 30 seconds)
 # TODO: catch errors when there is no internet
 # TODO: reuse the same browser window, check for accessibility to given url and sign in only if needed
+# TODO: parameter in Element that takes another Element object as the "flag" that tells us when the page has loaded
 # TODO: create "add element selector" wizard, checks if valid xpath or css selector in clipboard and adds it to object
 # TODO: status row
 

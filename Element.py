@@ -34,8 +34,28 @@ def ordinal_suffix(i):
         return "th"
 
 
-# an object representing an element, including all possible methods of locating it (xpath, css selector)
 class Element:
+    """An object representing an element, including all possible methods of locating it (xpath, css selector)
+    name (str): the name of the element
+    selectors=[] (list[str]): A list of possible ways of finding the element, either XPATH or CSS selector
+    mode="run for n time": Element find mode, either try and find the element as many times as possible in n time, or have a n second timeout per selector
+    capture_attribute="": Capture an element attribute and return it. If innerHTML, add to a string for scraping.
+    content_contains="": Ensure the found element contains the following text.
+    click=False: Click the element after locating it
+    return_on_click=False: Return True after element is clicked
+    send_values=None: Values to input into the element
+    clear=False: Flag to clear the contents of the element.
+    ensure_absence=False: Ensure element is not found, otherwise return False.
+    critical=True: Ensure the element is found, raise error if not.
+    timeout=DEFAULT_TIMEOUT: Overall loop timeout length if mode is "run for n time", otherwise timeout per selector.
+    pageload_wait=0: Time to wait after the page has started loading to start looking for the element
+    url=None: Go to this url to find the element
+    download_files=False: Opens the URL of all elements that have download and href attributes
+    iframe_capture="": Either grab the HTML from the Iframe or the Body from it
+    banned_iframe_url_snippets=["about:blank"]: Don't grab HTML from iframes with these strings in the URL
+    retry_on_stale: int = 5: the element may change in the time between finding it and using it. Retry retry_on_stale times when this happens.
+    """
+
     def __init__(
         self,
         name,
@@ -57,6 +77,7 @@ class Element:
         banned_iframe_url_snippets=["about:blank"],
         retry_on_stale: int = 5,
     ):
+
         self.name = name
 
         if mode not in ELEMENT_FIND_MODES:
