@@ -1,5 +1,5 @@
-from Selector import Selector
-from web_scraper_errors import ElementExistsError, ElementNotFoundError
+from .Selector import Selector
+from .web_scraper_errors import ElementExistsError, ElementNotFoundError
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "generalised_web_scraper"
+version = "0.0.1"
+authors = [
+    { name = "Sandro Mortimer", email = "sandromort+generalisedwebscraper@gmail.com" },
+]
+description = "A wrapper for selenium that provides genericisation and flexibility for iterative extraction of web elements"
+readme = "README.md"
+requires-python = ">=3.12.2"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/Mortbros/generalised-web-scraper"
+Issues = "https://github.com/Mortbros/generalised-web-scraper/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/generalised_web_scraper"]

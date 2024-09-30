@@ -1,6 +1,6 @@
-from Element import Element
+from .Element import Element
 
-from web_scraper_errors import ElementExistsError, ElementNotFoundError
+from .web_scraper_errors import ElementExistsError, ElementNotFoundError
 
 import time
 
