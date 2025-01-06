@@ -44,15 +44,16 @@ class WebScraper:
 
     def __init__(
         self,
-        name,
-        url,
-        sign_in_url,
-        sequences,
-        sign_in_sequence,
-        headless=False,
-        unique_file_name=True,
-        root_path=os.getcwd(),
-        document_merger_config=None,
+        name: str,
+        url: str,
+        sign_in_url: str,
+        sequences: list[ElementSequence],
+        sign_in_sequence: ElementSequence,
+        headless: bool = False,
+        unique_file_name: bool = True,
+        root_path: str = os.getcwd(),
+        document_merger_config: DocumentMergerConfig | None = None,
+        export_html: bool = True,
     ):
         self.download_handler = DownloadHandler()
         self.name = "".join(l for l in name if l not in "\\/:*?\"<>',")
@@ -139,6 +140,8 @@ class WebScraper:
         # self.status_row = StatusRow()
         self.document_merger_config = document_merger_config
 
+        self.export_html = export_html
+
     def run(self):
         try:
             os.chdir(self._current_scraper_path)
@@ -147,7 +150,8 @@ class WebScraper:
             self.sign_in()
             self.open_url()
             self.iterate_sequence()
-            self.write()
+            if self.export_html:
+                self.write()
             os.chdir(self._original_path)
 
             # run document merger
@@ -163,7 +167,8 @@ class WebScraper:
         except NoSuchWindowException:
             # TODO: this doesn't do what i want it to. an empty html file is created
             print("Window closed, writing to file")
-            self.write()
+            if self.export_html:
+                self.write()
 
     def write(self):
         filename = f"{self.name}{datetime.now().strftime(' %Y-%m-%d_%H-%M-%S') if self.unique_file_name else ''}.html"
